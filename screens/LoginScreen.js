@@ -1,111 +1,24 @@
-
-import { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ActivityIndicator,
-  ScrollView,
-  Pressable,
-} from 'react-native';
-import { api } from '../api/client';
-
-export default function ProfileDetailScreen({ route, navigation }) {
-  const { id } = route.params;
-  const [profile, setProfile] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  const fetchProfile = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await api.get(`/profiles/${id}`);
-      setProfile(res.data);
-    } catch (err) {
-      setError(err.message || 'Failed to load profile details');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchProfile();
-  }, [id]);
-
-  if (loading) {
-    return (
-      <View style={styles.centerContainer}>
-        <ActivityIndicator size="large" color="#007AFF" />
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>{error}</Text>
-        <Pressable style={styles.retryButton} onPress={fetchProfile}>
-          <Text style={styles.retryText}>Retry</Text>
-        </Pressable>
-      </View>
-    );
-  }
-
-  if (!profile) return null;
-
-  return (
-    <ScrollView style={styles.container}>
-      <View style={styles.card}>
-        <View style={styles.header}>
-          <Text style={styles.name}>{profile.name}</Text>
-        </View>
-        
-        <View style={styles.section}>
-          <Text style={styles.label}>Email</Text>
-          <Text style={styles.value}>{profile.email}</Text>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.label}>Age</Text>
-          <Text style={styles.value}>{profile.age}</Text>
-        </View>
-
-        {profile.phone && (
-          <View style={styles.section}>
-            <Text style={styles.label}>Phone</Text>
-            <Text style={styles.value}>{profile.phone}</Text>
-          </View>
-        )}
-
-        {profile.bio && (
-          <View style={styles.section}>
-            <Text style={styles.label}>Bio</Text>
-            <Text style={styles.bioText}>{profile.bio}</Text>
-          </View>
-        )}
-      </View>
-    </ScrollView>
-  );
+import { useState } from'react';
+import { View, Text, TextInput, Pressable, StyleSheet } from 'react-native';
+export default function LoginScreen({ navigation }) {
+const [username, setUsername]= useState('');
+const handleLogin= () => {
+if (!username.trim()) return;
+navigation.replace('Home'
+, { username });
+};
+return (
+<View style={styles.container}>
+<Text style={styles.title}>Login</Text>
+<TextInput
+placeholder="Enter username"
+value={username}
+onChangeText={setUsername}
+style={styles.input}
+/>
+<Pressable style={styles.button} onPress={handleLogin}>
+<Text style={styles.buttonText}>Login</Text>
+</Pressable>
+</View>
+);
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  centerContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  card: {
-    backgroundColor: 'white',
-    margin: 16,
-    borderRadius: 12,
-    padding: 20,
-    elevation: 4,
-  },
-  header: { borderBottomWidth: 1, borderBottomColor: '#e0e0e0', paddingBottom: 16, marginBottom: 16 },
-  name: { fontSize: 28, fontWeight: 'bold' },
-  section: { marginBottom: 16 },
-  label: { fontSize: 12, fontWeight: '600', color: '#666', textTransform: 'uppercase' },
-  value: { fontSize: 16, color: '#333', marginTop: 4 },
-  bioText: { fontSize: 16, lineHeight: 24, marginTop: 4 },
-  errorText: { color: 'red', marginBottom: 10 },
-  retryButton: { backgroundColor: '#007AFF', padding: 10, borderRadius: 5 },
-  retryText: { color: 'white' }
-});
